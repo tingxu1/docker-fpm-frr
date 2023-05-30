@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# toggle the mux to auto if dualtor
+if [[ "$(sonic-cfggen -d -v DEVICE_METADATA.localhost.subtype | tr [:upper:] [:lower:])" == *"dualtor"* ]];
+then
+  logger -t TSB -p user.info "Toggle all mux mode to auto"
+  sudo config mux mode auto all
+fi
+
+/usr/bin/TS TSB
+echo "Please execute 'config save' to preserve System mode in Normal state after reboot or config reload"
