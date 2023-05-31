@@ -62,7 +62,6 @@ stderr_logfile=syslog
 dependent_startup=true
 dependent_startup_wait_for=zsocket:exited
 
-{% if DEVICE_METADATA.localhost.frr_mgmt_framework_config is defined and DEVICE_METADATA.localhost.frr_mgmt_framework_config == "true" %}
 [program:bfdd]
 command=/usr/lib/frr/bfdd -A 127.0.0.1
 priority=4
@@ -74,7 +73,16 @@ stdout_logfile=syslog
 stderr_logfile=syslog
 dependent_startup=true
 dependent_startup_wait_for=zebra:running
-{% endif %}
+
+[program:isisd]
+command=/usr/lib/frr/isisd -A 127.0.0.1
+priority=5
+stopsignal=KILL
+autostart=false
+autorestart=false
+startsecs=0
+stdout_logfile=syslog
+stderr_logfile=syslog
 
 [program:bgpd]
 command=/usr/lib/frr/bgpd -A 127.0.0.1 -M snmp
@@ -88,9 +96,20 @@ stderr_logfile=syslog
 dependent_startup=true
 dependent_startup_wait_for=zsocket:exited
 
-{% if DEVICE_METADATA.localhost.frr_mgmt_framework_config is defined and DEVICE_METADATA.localhost.frr_mgmt_framework_config == "true" %}
 [program:ospfd]
 command=/usr/lib/frr/ospfd -A 127.0.0.1 -M snmp
+priority=5
+stopsignal=KILL
+autostart=false
+autorestart=false
+startsecs=0
+stdout_logfile=syslog
+stderr_logfile=syslog
+dependent_startup=true
+dependent_startup_wait_for=zebra:running
+
+[program:ospf6d]
+command=/usr/lib/frr/ospf6d -A 127.0.0.1
 priority=5
 stopsignal=KILL
 autostart=false
@@ -112,7 +131,6 @@ stdout_logfile=syslog
 stderr_logfile=syslog
 dependent_startup=true
 dependent_startup_wait_for=zebra:running
-{% endif %}
 
 [program:fpmsyncd]
 command=fpmsyncd
@@ -125,13 +143,8 @@ stderr_logfile=syslog
 dependent_startup=true
 dependent_startup_wait_for=bgpd:running
 
-{% if DEVICE_METADATA.localhost.frr_mgmt_framework_config is defined and DEVICE_METADATA.localhost.frr_mgmt_framework_config == "true" %}
-[program:frrcfgd]
-command=/usr/local/bin/frrcfgd
-{% else %}
 [program:bgpcfgd]
 command=/usr/local/bin/bgpcfgd
-{% endif %}
 priority=6
 autostart=false
 autorestart=false
@@ -152,7 +165,6 @@ stderr_logfile=syslog
 dependent_startup=true
 dependent_startup_wait_for=bgpd:running
 
-{% if DEVICE_METADATA.localhost.docker_routing_config_mode is defined and (DEVICE_METADATA.localhost.docker_routing_config_mode == "unified" or DEVICE_METADATA.localhost.docker_routing_config_mode == "split-unified") %}
 [program:vtysh_b]
 command=/usr/bin/vtysh -b
 priority=6
@@ -163,9 +175,7 @@ stdout_logfile=syslog
 stderr_logfile=syslog
 dependent_startup=true
 dependent_startup_wait_for=bgpd:running
-{% endif %}
 
-{% if WARM_RESTART is defined and WARM_RESTART.bgp is defined and WARM_RESTART.bgp.bgp_eoiu is defined and WARM_RESTART.bgp.bgp_eoiu == "true" %}
 [program:bgp_eoiu_marker]
 command=/usr/bin/bgp_eoiu_marker.py
 priority=7
@@ -177,4 +187,27 @@ stdout_logfile=syslog
 stderr_logfile=syslog
 dependent_startup=true
 dependent_startup_wait_for=bgpd:running
-{% endif %}
+
+[program:net_detect]
+command=/usr/bin/python3 /usr/bin/net_detect.py
+priority=5
+stopsignal=KILL
+autostart=false
+autorestart=false
+startsecs=0
+stdout_logfile=syslog
+stderr_logfile=syslog
+dependent_startup=true
+dependent_startup_wait_for=bgpd:running
+
+[program:EXrt_syncd]
+command=/usr/bin/python3 /usr/bin/EXrt_syncd.py
+priority=5
+stopsignal=KILL
+autostart=false
+autorestart=false
+startsecs=0
+stdout_logfile=syslog
+stderr_logfile=syslog
+dependent_startup=true
+dependent_startup_wait_for=bgpd:running
